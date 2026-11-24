@@ -6,6 +6,7 @@ import { RouteSeo } from './components/RouteSeo';
 import { AboutPage } from './pages/AboutPage';
 import { CareersPage } from './pages/CareersPage';
 import { ContactPage } from './pages/ContactPage';
+import { DeleteAccountPage } from './pages/DeleteAccountPage';
 import { EditorPage } from './pages/EditorPage';
 import { ExplorePage } from './pages/ExplorePage';
 import { ExportsPage } from './pages/ExportsPage';
@@ -56,6 +57,7 @@ export function App() {
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/delete-account" element={<DeleteAccountPage />} />
             <Route path="/terms" element={<TermsPage />} />
 
             {/* Auth Pages */}
