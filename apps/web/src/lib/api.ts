@@ -1,7 +1,13 @@
 import { CurrencyCode, ExportRecord, PlanId, PricingPlan, ProjectConfig, UserProfile } from '@patra/shared';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-export const STUDIO_URL = import.meta.env.VITE_STUDIO_URL || 'http://localhost:5173';
+function normalizeBaseUrl(raw: string | undefined, fallback: string): string {
+  const trimmed = (raw || '').trim().replace(/\/+$/, '');
+  if (!trimmed) return fallback;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+export const API_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL, 'http://localhost:4000');
+export const STUDIO_URL = normalizeBaseUrl(import.meta.env.VITE_STUDIO_URL, 'http://localhost:5173');
 
 const TOKEN_KEY = 'patra_web_token';
 

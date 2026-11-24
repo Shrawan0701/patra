@@ -4,24 +4,9 @@
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "cd ../.. && npm run build:shared && npm run build:web",
   "outputDirectory": "dist",
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.patra.media"
-        }
-      ],
-      "destination": "https://patra.media/$1",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
-      "source": "/((?!assets/|patra-logo\\.png|robots\\.txt|sitemap\\.xml|site\\.webmanifest).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],

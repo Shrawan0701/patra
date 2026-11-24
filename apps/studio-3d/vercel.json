@@ -4,11 +4,9 @@
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "cd ../.. && npm run build:shared && npm run build:studio",
   "outputDirectory": "dist",
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!assets/|patra-logo\\.png).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
