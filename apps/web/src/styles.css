@@ -2044,12 +2044,32 @@ dialog.patra-dialog[open] {
   .showcase-info-card {
     left: 10px;
     right: 10px;
-    bottom: 14px;
+    bottom: 10px;
     width: auto;
-    padding: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
-  .showcase-info-card p {
+  .showcase-info-tag,
+  .showcase-info-card p,
+  .showcase-info-meta {
     display: none;
+  }
+  .showcase-info-card h3 {
+    margin: 0;
+    font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .showcase-info-card .btn {
+    margin-top: 0;
+    padding: 6px 10px;
+    font-size: 11.5px;
+    flex-shrink: 0;
   }
   .showcase-round-btn span {
     display: none;
