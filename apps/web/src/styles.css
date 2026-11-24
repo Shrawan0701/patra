@@ -1130,6 +1130,7 @@ dialog.patra-dialog[open] {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
+  overflow-x: clip;
 }
 .app-sidebar {
   border-right: 1px solid var(--border);
@@ -1170,6 +1171,7 @@ dialog.patra-dialog[open] {
 .app-main {
   padding: 32px 36px 72px;
   min-width: 0;
+  max-width: 100%;
 }
 .metric-val {
   font-size: 26px;
@@ -1564,7 +1566,8 @@ dialog.patra-dialog[open] {
 
   /* Responsive App Dashboard Shell with Off-Canvas Drawer & Bottom Tabs */
   .app-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: clip;
   }
   .app-mobile-bar {
     position: sticky;
@@ -1609,6 +1612,8 @@ dialog.patra-dialog[open] {
   }
   .app-main {
     padding: 20px 18px 88px;
+    min-width: 0;
+    max-width: 100%;
   }
   .app-bottom-nav {
     position: fixed;
@@ -1723,10 +1728,14 @@ dialog.patra-dialog[open] {
   gap: 18px;
   align-items: start;
 }
+.studio-feature-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
 
 @media (max-width: 980px) {
   .studio-feature-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

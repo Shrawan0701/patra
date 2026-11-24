@@ -288,7 +288,12 @@ export function App() {
     setExportPct(0);
 
     try {
-      const audioStream = synthRef.current.start(true);
+      const candidateAudioStream = synthRef.current.start(true);
+      await new Promise((r) => window.setTimeout(r, 60));
+      const audioStream = synthRef.current.isRunning() ? candidateAudioStream : null;
+      if (!audioStream && isMuted) {
+        synthRef.current.stop();
+      }
       const { blob, mimeType } = await sceneRef.current.exportShowcaseVideo(audioStream, (pct) => {
         setExportPct(pct);
         sendToNative('EXPORT_PROGRESS', { pct });
@@ -296,15 +301,31 @@ export function App() {
       if (isMuted) synthRef.current.stop();
 
       if (sendBase64ToNative) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          sendToNative('EXPORT_COMPLETE', {
-            dataUrl: reader.result,
-            mimeType,
-            title: project.title,
-          });
-        };
-        reader.readAsDataURL(blob);
+        if (!window.ReactNativeWebView && window.parent !== window) {
+          const buffer = await blob.arrayBuffer();
+          window.parent.postMessage(
+            {
+              type: 'EXPORT_COMPLETE_BINARY',
+              payload: {
+                buffer,
+                mimeType,
+                title: project.title,
+              },
+            },
+            '*',
+            [buffer]
+          );
+        } else {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            sendToNative('EXPORT_COMPLETE', {
+              dataUrl: reader.result,
+              mimeType,
+              title: project.title,
+            });
+          };
+          reader.readAsDataURL(blob);
+        }
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -314,6 +335,11 @@ export function App() {
         a.click();
         URL.revokeObjectURL(url);
       }
+    } catch (err) {
+      if (isMuted) synthRef.current.stop();
+      sendToNative('EXPORT_ERROR', {
+        message: err instanceof Error ? err.message : 'Video export failed on this browser',
+      });
     } finally {
       setIsExporting(false);
     }

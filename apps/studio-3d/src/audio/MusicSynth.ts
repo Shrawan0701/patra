@@ -55,6 +55,10 @@ export class MusicSynth {
     return this.muted;
   }
 
+  public isRunning(): boolean {
+    return this.ctx?.state === 'running';
+  }
+
   private playChordPad(freqs: number[], durationSec: number) {
     if (!this.ctx || !this.masterGain) return;
     const now = this.ctx.currentTime;

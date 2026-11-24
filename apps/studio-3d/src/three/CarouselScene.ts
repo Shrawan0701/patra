@@ -1521,6 +1521,9 @@ export class CarouselScene {
     audioStream: MediaStream | null,
     onProgress?: (pct: number) => void
   ): Promise<{ blob: Blob; mimeType: string }> {
+    if (typeof MediaRecorder === 'undefined') {
+      throw new Error('Video recording is not supported in this browser.');
+    }
     this.stopPreview();
     const canvasStream = this.renderer.domElement.captureStream(30);
     const combined = new MediaStream();
@@ -1530,20 +1533,28 @@ export class CarouselScene {
     }
 
     const candidates = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
       'video/mp4;codecs=avc1',
+      'video/mp4',
       'video/webm;codecs=vp9,opus',
       'video/webm;codecs=vp8,opus',
       'video/webm',
     ];
-    const mimeType = candidates.find((c) => MediaRecorder.isTypeSupported(c)) || 'video/webm';
+    const selectedMime =
+      typeof MediaRecorder.isTypeSupported === 'function'
+        ? candidates.find((c) => MediaRecorder.isTypeSupported(c))
+        : undefined;
 
-    const recorder = new MediaRecorder(combined, {
-      mimeType,
-      videoBitsPerSecond: 4_200_000,
-    });
+    const recorder = new MediaRecorder(
+      combined,
+      selectedMime
+        ? { mimeType: selectedMime, videoBitsPerSecond: 4_200_000 }
+        : { videoBitsPerSecond: 4_200_000 }
+    );
+    const finalMime = recorder.mimeType || selectedMime || 'video/mp4';
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (ev) => {
-      if (ev.data.size > 0) chunks.push(ev.data);
+      if (ev.data && ev.data.size > 0) chunks.push(ev.data);
     };
 
     const timeline = this.getTimeline();
@@ -1568,13 +1579,35 @@ export class CarouselScene {
     });
 
     const blob = await new Promise<Blob>((resolve) => {
-      recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
-      recorder.stop();
+      if (recorder.state === 'inactive') {
+        resolve(new Blob(chunks, { type: finalMime }));
+        return;
+      }
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(fallbackTimer);
+        resolve(new Blob(chunks, { type: finalMime }));
+      };
+      const fallbackTimer = window.setTimeout(finish, 3000);
+      recorder.onstop = finish;
+      try {
+        recorder.requestData();
+      } catch {
+        // Some browsers throw if stop follows immediately
+      }
+      try {
+        recorder.stop();
+      } catch {
+        finish();
+      }
     });
 
+    canvasStream.getTracks().forEach((t) => t.stop());
     this.stopPreview();
     this.setActiveRoom(startRoom);
-    return { blob, mimeType };
+    return { blob, mimeType: finalMime };
   }
 
   public dispose() {

@@ -76,39 +76,59 @@ exportsRouter.post('/authorize', async (req: AuthedRequest, res) => {
     });
   }
 
-  const result = await prisma.$transaction(async (tx) => {
-    let updatedUser = user;
-    if (source === 'plan') {
-      updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: { planExportsRemaining: { decrement: 1 } },
-      });
-    } else if (source === 'credit') {
-      updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: { exportCredits: { decrement: 1 } },
-      });
-      // Grant 7-day free typo re-exports for this project
-      if (projectId) {
-        await tx.project.updateMany({
-          where: { id: projectId, userId: user.id },
-          data: { reexportGraceUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+  let result: { updatedUser: typeof user; record: Awaited<ReturnType<typeof prisma.exportRecord.create>> };
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      let updatedUser = user;
+      if (source === 'plan') {
+        const upd = await tx.user.updateMany({
+          where: { id: user.id, planExportsRemaining: { gt: 0 } },
+          data: { planExportsRemaining: { decrement: 1 } },
         });
+        if (upd.count === 0) {
+          throw new Error('INSUFFICIENT_QUOTA');
+        }
+        updatedUser = (await tx.user.findUniqueOrThrow({ where: { id: user.id } })) ?? user;
+      } else if (source === 'credit') {
+        const upd = await tx.user.updateMany({
+          where: { id: user.id, exportCredits: { gt: 0 } },
+          data: { exportCredits: { decrement: 1 } },
+        });
+        if (upd.count === 0) {
+          throw new Error('INSUFFICIENT_QUOTA');
+        }
+        updatedUser = (await tx.user.findUniqueOrThrow({ where: { id: user.id } })) ?? user;
+        // Grant 7-day free typo re-exports for this project
+        if (projectId) {
+          await tx.project.updateMany({
+            where: { id: projectId, userId: user.id },
+            data: { reexportGraceUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+          });
+        }
       }
-    }
 
-    const record = await tx.exportRecord.create({
-      data: {
-        userId: user.id,
-        projectId,
-        projectTitle,
-        aspectRatio,
-        resolution,
-      },
+      const record = await tx.exportRecord.create({
+        data: {
+          userId: user.id,
+          projectId,
+          projectTitle,
+          aspectRatio,
+          resolution,
+        },
+      });
+
+      return { updatedUser, record };
     });
-
-    return { updatedUser, record };
-  });
+  } catch (err) {
+    if (err instanceof Error && err.message === 'INSUFFICIENT_QUOTA') {
+      return res.status(402).json({
+        error: 'Unlock 4K Video Export to download this 3D invitation',
+        code: 'PAYWALL_REQUIRED',
+        plans: PRICING_PLANS,
+      });
+    }
+    throw err;
+  }
 
   void sendExpoPush(
     user.expoPushToken,
@@ -129,9 +149,9 @@ exportsRouter.post('/authorize', async (req: AuthedRequest, res) => {
       createdAt: result.record.createdAt.toISOString(),
     },
     quota: {
-      exportCredits: result.updatedUser.exportCredits,
+      exportCredits: Math.max(0, result.updatedUser.exportCredits),
       planTier: result.updatedUser.planTier,
-      planExportsRemaining: result.updatedUser.planExportsRemaining,
+      planExportsRemaining: Math.max(0, result.updatedUser.planExportsRemaining),
     },
   });
 });

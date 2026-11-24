@@ -262,7 +262,7 @@ export default function ProfileScreen() {
               </View>
               <View style={[styles.creditsBadge, { backgroundColor: colors.vermilionSoft }]}>
                 <Text style={[styles.creditsNum, { color: colors.vermilion }]}>
-                  {(user?.exportCredits ?? 0) + (user?.planExportsRemaining ?? 0)}
+                  {Math.max(0, user?.exportCredits ?? 0) + Math.max(0, user?.planExportsRemaining ?? 0)}
                 </Text>
                 <Text style={[styles.creditsLabel, { color: colors.vermilion }]}>
                   Downloads Left
@@ -272,10 +272,10 @@ export default function ProfileScreen() {
 
             <View style={styles.breakdown}>
               <Text style={[styles.breakItem, { color: colors.inkSoft }]}>
-                Plan Quota Remaining: {user?.planExportsRemaining ?? 0}
+                Plan Quota Remaining: {Math.max(0, user?.planExportsRemaining ?? 0)}
               </Text>
               <Text style={[styles.breakItem, { color: colors.inkSoft }]}>
-                Single &amp; Referral Credits: {user?.exportCredits ?? 0}
+                Single &amp; Referral Credits: {Math.max(0, user?.exportCredits ?? 0)}
               </Text>
             </View>
 

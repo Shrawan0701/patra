@@ -17,7 +17,8 @@ interface StudioStageProps {
   onPreviewProgress?: (elapsed: number, total: number, pct: number) => void;
   onPreviewDone?: () => void;
   onExportProgress?: (pct: number) => void;
-  onExportComplete?: (dataUrl: string, mimeType: string, title: string) => void;
+  onExportComplete?: (dataUrl: string, mimeType: string, title: string, blob?: Blob) => void;
+  onExportError?: (message: string) => void;
   onCustomTextMoved?: (roomIndex: number, id: string, x: number, y: number) => void;
   onPhotoCutoutMoved?: (roomIndex: number, slot: 1 | 2, offsetX: number, offsetZ: number) => void;
 }
@@ -36,6 +37,7 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
       onPreviewDone,
       onExportProgress,
       onExportComplete,
+      onExportError,
       onCustomTextMoved,
       onPhotoCutoutMoved,
     },
@@ -57,6 +59,7 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
       onPreviewDone,
       onExportProgress,
       onExportComplete,
+      onExportError,
       onCustomTextMoved,
       onPhotoCutoutMoved,
     });
@@ -69,6 +72,7 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
       onPreviewDone,
       onExportProgress,
       onExportComplete,
+      onExportError,
       onCustomTextMoved,
       onPhotoCutoutMoved,
     };
@@ -169,11 +173,25 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
             latest.onPreviewDone?.();
           } else if (msg.type === 'EXPORT_PROGRESS') {
             latest.onExportProgress?.(msg.payload?.pct ?? 0);
+          } else if (msg.type === 'EXPORT_COMPLETE_BINARY' && msg.payload?.buffer) {
+            const mimeType = msg.payload.mimeType || 'video/mp4';
+            const blob = new Blob([msg.payload.buffer], { type: mimeType });
+            const objectUrl = URL.createObjectURL(blob);
+            latest.onExportComplete?.(
+              objectUrl,
+              mimeType,
+              msg.payload.title || latest.project.title,
+              blob
+            );
           } else if (msg.type === 'EXPORT_COMPLETE' && msg.payload?.dataUrl) {
             latest.onExportComplete?.(
               msg.payload.dataUrl,
               msg.payload.mimeType || 'video/webm',
               msg.payload.title || latest.project.title
+            );
+          } else if (msg.type === 'EXPORT_ERROR') {
+            latest.onExportError?.(
+              msg.payload?.message || 'Video export failed on this browser'
             );
           } else if (
             msg.type === 'CUSTOM_TEXT_MOVED' &&

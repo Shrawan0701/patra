@@ -316,7 +316,7 @@ export function CardsPage() {
 
   return (
     <AppLayout>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0, maxWidth: '100%' }}>
         <div className="page-header">
           <div>
             <h1>1-Page Invitation Cards</h1>
@@ -391,7 +391,9 @@ export function CardsPage() {
             <div
               style={{
                 width: '100%',
-                minHeight: 480,
+                maxWidth: '100%',
+                minHeight: 340,
+                boxSizing: 'border-box',
                 borderRadius: 12,
                 background: '#1C1920',
                 display: 'flex',
@@ -462,7 +464,7 @@ export function CardsPage() {
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     className={`chip-btn ${catFilter === 'all' ? 'active' : ''}`}
@@ -482,7 +484,7 @@ export function CardsPage() {
                   ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, maxHeight: 380, overflowY: 'auto', paddingRight: 4 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))', gap: 8, maxHeight: 380, overflowY: 'auto', paddingRight: 4 }}>
                   {filteredTemplates.map((tpl) => {
                     const selected = card.templateId === tpl.id;
                     return (

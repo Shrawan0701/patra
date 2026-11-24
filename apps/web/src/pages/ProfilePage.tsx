@@ -86,10 +86,30 @@ export function ProfilePage() {
                   ? 'Yearly Studio All-Access'
                   : 'Single Download / Free Mode'}
               </h2>
-              <p style={{ margin: 0, fontSize: 14, color: 'var(--ink-soft)' }}>
-                Plan downloads remaining: <strong>{user?.planExportsRemaining ?? 0}</strong> · Single download credits:{' '}
-                <strong>{user?.exportCredits ?? 0}</strong>
-              </p>
+              {(() => {
+                const planRemaining = Math.max(0, user?.planExportsRemaining ?? 0);
+                const singleCredits = Math.max(0, user?.exportCredits ?? 0);
+                const onPaidPlan = Boolean(user?.planTier && user.planTier !== 'NONE');
+                return (
+                  <p style={{ margin: 0, fontSize: 14, color: 'var(--ink-soft)' }}>
+                    {onPaidPlan ? (
+                      <>
+                        Plan downloads remaining: <strong>{planRemaining}</strong>
+                        {singleCredits > 0 && (
+                          <>
+                            {' '}
+                            · Single download credits: <strong>{singleCredits}</strong>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        Single download credits: <strong>{singleCredits}</strong>
+                      </>
+                    )}
+                  </p>
+                );
+              })()}
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
