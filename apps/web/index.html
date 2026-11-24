@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F6F5F1" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0C10" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,8 +12,10 @@
     <script>
       try {
         var s = localStorage.getItem('color-scheme');
-        if (s === 'light' || s === 'dark') {
-          document.querySelector('meta[name="color-scheme"]').content = s;
+        if (s === 'dark') {
+          document.querySelector('meta[name="color-scheme"]').content = 'dark';
+        } else if (s === 'system') {
+          document.querySelector('meta[name="color-scheme"]').content = 'light dark';
         }
       } catch (e) {}
     </script>

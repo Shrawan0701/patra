@@ -13,11 +13,11 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 function readStoredPreference(): ThemePreference {
   try {
     const val = localStorage.getItem('color-scheme');
-    if (val === 'light' || val === 'dark') return val;
+    if (val === 'light' || val === 'dark' || val === 'system') return val;
   } catch {
     // Ignore storage block
   }
-  return 'system';
+  return 'light';
 }
 
 function getSystemDark(): boolean {
@@ -63,11 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setPreferenceState(pref);
     applyMetaContent(pref);
     try {
-      if (pref === 'system') {
-        localStorage.removeItem('color-scheme');
-      } else {
-        localStorage.setItem('color-scheme', pref);
-      }
+      localStorage.setItem('color-scheme', pref);
     } catch {
       // Ignore storage block
     }
