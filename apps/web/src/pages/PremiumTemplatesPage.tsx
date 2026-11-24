@@ -1,18 +1,14 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Crown, Globe, Lock, MailOpen, Play, RotateCw, Sparkles, Square } from 'lucide-react';
+import { ArrowRight, Crown, Globe, MailOpen, Play, RotateCw, Sparkles, Square } from 'lucide-react';
 import {
   PREMIUM_TEMPLATES,
   TemplatePreset,
   TemplateRegionId,
   getStructureById,
-  hasStudioUnlockAccess,
 } from '@patra/shared';
 import { AppLayout } from '../components/AppLayout';
-import { PaymentReturnModal } from '../components/PaymentReturnModal';
-import { PaywallModal } from '../components/PaywallModal';
 import { StudioStage, StudioStageHandle } from '../components/StudioStage';
-import { useAuth } from '../context/AuthContext';
 
 const REGION_TABS: { id: 'all' | TemplateRegionId; label: string; count: number; subtitle: string }[] = [
   { id: 'all', label: 'All Collections', count: 30, subtitle: 'Global handcrafted architectural scenes' },
@@ -22,15 +18,11 @@ const REGION_TABS: { id: 'all' | TemplateRegionId; label: string; count: number;
 ];
 
 export function PremiumTemplatesPage() {
-  const { user, refreshUser } = useAuth();
   const stageRef = useRef<StudioStageHandle | null>(null);
   const [region, setRegion] = useState<'all' | TemplateRegionId>('all');
   const [featured, setFeatured] = useState<TemplatePreset>(PREMIUM_TEMPLATES[0]);
   const [viewMode, setViewMode] = useState<'stage' | 'wax_envelope'>('stage');
   const [previewing, setPreviewing] = useState(false);
-  const [paywallOpen, setPaywallOpen] = useState(false);
-
-  const unlocked = hasStudioUnlockAccess(user);
 
   const visibleTemplates = useMemo(
     () => (region === 'all' ? PREMIUM_TEMPLATES : PREMIUM_TEMPLATES.filter((t) => t.region === region)),
@@ -49,11 +41,6 @@ export function PremiumTemplatesPage() {
               30 bespoke handcrafted 3D architectural invitations across Indian, Western &amp; European, and East Asian traditions.
             </p>
           </div>
-          {!unlocked && (
-            <button type="button" className="btn btn-primary" onClick={() => setPaywallOpen(true)}>
-              <Crown size={15} /> Unlock All 30 Templates
-            </button>
-          )}
         </div>
 
         {/* Regional Collection Tabs */}
@@ -157,15 +144,9 @@ export function PremiumTemplatesPage() {
               </div>
             </div>
 
-            {unlocked ? (
-              <Link to={`/app/editor/tpl:${featured.id}`} className="btn btn-primary btn-lg">
-                Customize in Studio <ArrowRight size={16} />
-              </Link>
-            ) : (
-              <button type="button" className="btn btn-primary btn-lg" onClick={() => setPaywallOpen(true)}>
-                <Lock size={15} /> Unlock Download Pass or Plan
-              </button>
-            )}
+            <Link to={`/app/editor/tpl:${featured.id}`} className="btn btn-primary btn-lg">
+              Customize in Studio <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
 
@@ -226,75 +207,20 @@ export function PremiumTemplatesPage() {
                     >
                       Preview 3D
                     </button>
-                    {unlocked && (
-                      <Link
-                        to={`/app/editor/tpl:${tpl.id}`}
-                        className="btn btn-sm btn-primary"
-                        style={{ flex: 1 }}
-                      >
-                        Edit Studio
-                      </Link>
-                    )}
+                    <Link
+                      to={`/app/editor/tpl:${tpl.id}`}
+                      className="btn btn-sm btn-primary"
+                      style={{ flex: 1 }}
+                    >
+                      Edit Studio
+                    </Link>
                   </div>
                 </div>
-
-                {!unlocked && (
-                  <div className="premium-blur-veil">
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 999,
-                        background: 'rgba(255,255,255,0.18)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Lock size={18} />
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{tpl.name}</div>
-                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                      <button
-                        type="button"
-                        className="btn btn-sm"
-                        style={{ background: 'rgba(255,255,255,0.92)', color: '#181512' }}
-                        onClick={() => {
-                          setFeatured(tpl);
-                          setViewMode('stage');
-                        }}
-                      >
-                        Preview 3D
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        onClick={() => setPaywallOpen(true)}
-                      >
-                        Unlock
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       </div>
-
-      <PaywallModal
-        visible={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        onUnlocked={() => {
-          setPaywallOpen(false);
-          void refreshUser();
-        }}
-      />
-      <PaymentReturnModal
-        onVerified={() => {
-          void refreshUser();
-        }}
-      />
     </AppLayout>
   );
 }

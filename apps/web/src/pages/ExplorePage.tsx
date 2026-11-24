@@ -600,6 +600,7 @@ export function ExplorePage() {
               <div className="stage-viewport" style={{ aspectRatio: '16 / 10', position: 'relative' }}>
                 <StudioStage
                   ref={occasionStageRef}
+                  lazy
                   project={occasionShowcaseProject}
                   viewMode={
                     occasionMode === 'garden'

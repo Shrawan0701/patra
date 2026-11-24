@@ -12,6 +12,7 @@ interface StudioStageProps {
   viewMode?: 'stage' | 'wax_envelope' | 'garden_entrance';
   className?: string;
   title?: string;
+  lazy?: boolean;
   onReady?: () => void;
   onPreviewProgress?: (elapsed: number, total: number, pct: number) => void;
   onPreviewDone?: () => void;
@@ -29,6 +30,7 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
       viewMode = 'stage',
       className,
       title = 'Patra 3D Interactive Stage',
+      lazy = false,
       onReady,
       onPreviewProgress,
       onPreviewDone,
@@ -39,13 +41,45 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
     },
     ref
   ) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const iframeRef = useRef<HTMLIFrameElement | null>(null);
+    const loadFallbackRef = useRef<number | null>(null);
+    const [shouldMount, setShouldMount] = useState(!lazy);
     const [ready, setReady] = useState(false);
+    const [stageLoaded, setStageLoaded] = useState(false);
+
+    const latestPropsRef = useRef({
+      project,
+      activeRoomIdx,
+      viewMode,
+      onReady,
+      onPreviewProgress,
+      onPreviewDone,
+      onExportProgress,
+      onExportComplete,
+      onCustomTextMoved,
+      onPhotoCutoutMoved,
+    });
+    latestPropsRef.current = {
+      project,
+      activeRoomIdx,
+      viewMode,
+      onReady,
+      onPreviewProgress,
+      onPreviewDone,
+      onExportProgress,
+      onExportComplete,
+      onCustomTextMoved,
+      onPhotoCutoutMoved,
+    };
 
     const postToIframe = (type: string, payload?: unknown) => {
       const win = iframeRef.current?.contentWindow;
       if (!win) return;
-      win.postMessage(JSON.stringify({ type, payload, activeRoomIdx }), '*');
+      win.postMessage(
+        JSON.stringify({ type, payload, activeRoomIdx: latestPropsRef.current.activeRoomIdx }),
+        '*'
+      );
     };
 
     useImperativeHandle(ref, () => ({
@@ -53,6 +87,26 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
         postToIframe(type, payload);
       },
     }));
+
+    useEffect(() => {
+      if (!lazy || shouldMount) return;
+      const el = containerRef.current;
+      if (!el || typeof IntersectionObserver === 'undefined') {
+        setShouldMount(true);
+        return;
+      }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            setShouldMount(true);
+            observer.disconnect();
+          }
+        },
+        { rootMargin: '260px' }
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, [lazy, shouldMount]);
 
     useEffect(() => {
       if (ready) {
@@ -76,40 +130,57 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
     }, [viewMode, ready]);
 
     useEffect(() => {
+      return () => {
+        if (loadFallbackRef.current !== null) {
+          window.clearTimeout(loadFallbackRef.current);
+          loadFallbackRef.current = null;
+        }
+      };
+    }, []);
+
+    useEffect(() => {
+      if (!shouldMount) return;
+
       const onMessage = (event: MessageEvent) => {
         if (event.source !== iframeRef.current?.contentWindow) return;
+        const latest = latestPropsRef.current;
         try {
           const msg =
             typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
           if (!msg || typeof msg.type !== 'string') return;
 
           if (msg.type === 'READY') {
+            if (loadFallbackRef.current !== null) {
+              window.clearTimeout(loadFallbackRef.current);
+              loadFallbackRef.current = null;
+            }
             setReady(true);
-            postToIframe('SET_PROJECT', project);
-            postToIframe('SET_VIEW_MODE', viewMode);
-            onReady?.();
+            setStageLoaded(true);
+            postToIframe('SET_PROJECT', latest.project);
+            postToIframe('SET_VIEW_MODE', latest.viewMode);
+            latest.onReady?.();
           } else if (msg.type === 'PREVIEW_PROGRESS') {
-            onPreviewProgress?.(
+            latest.onPreviewProgress?.(
               msg.payload?.elapsed ?? 0,
               msg.payload?.total ?? 0,
               msg.payload?.pct ?? 0
             );
           } else if (msg.type === 'PREVIEW_DONE') {
-            onPreviewDone?.();
+            latest.onPreviewDone?.();
           } else if (msg.type === 'EXPORT_PROGRESS') {
-            onExportProgress?.(msg.payload?.pct ?? 0);
+            latest.onExportProgress?.(msg.payload?.pct ?? 0);
           } else if (msg.type === 'EXPORT_COMPLETE' && msg.payload?.dataUrl) {
-            onExportComplete?.(
+            latest.onExportComplete?.(
               msg.payload.dataUrl,
               msg.payload.mimeType || 'video/webm',
-              msg.payload.title || project.title
+              msg.payload.title || latest.project.title
             );
           } else if (
             msg.type === 'CUSTOM_TEXT_MOVED' &&
             typeof msg.payload?.roomIndex === 'number' &&
             msg.payload?.id
           ) {
-            onCustomTextMoved?.(
+            latest.onCustomTextMoved?.(
               msg.payload.roomIndex,
               msg.payload.id,
               msg.payload.x ?? 0,
@@ -119,7 +190,7 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
             msg.type === 'PHOTO_CUTOUT_MOVED' &&
             typeof msg.payload?.roomIndex === 'number'
           ) {
-            onPhotoCutoutMoved?.(
+            latest.onPhotoCutoutMoved?.(
               msg.payload.roomIndex,
               msg.payload.slot === 2 ? 2 : 1,
               msg.payload.offsetX ?? 0,
@@ -133,24 +204,42 @@ export const StudioStage = React.forwardRef<StudioStageHandle, StudioStageProps>
 
       window.addEventListener('message', onMessage);
       return () => window.removeEventListener('message', onMessage);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [project, activeRoomIdx, viewMode, onPreviewProgress, onPreviewDone, onExportProgress, onExportComplete, onCustomTextMoved, onPhotoCutoutMoved]);
+    }, [shouldMount]);
 
     return (
-      <iframe
-        ref={iframeRef}
-        src={`${STUDIO_URL}/?embed=1`}
-        title={title}
-        className={className || 'stage-iframe'}
-        allow="autoplay"
-        onLoad={() => {
-          setReady(true);
-          setTimeout(() => {
-            postToIframe('SET_PROJECT', project);
-            postToIframe('SET_VIEW_MODE', viewMode);
-          }, 80);
-        }}
-      />
+      <div ref={containerRef} className={`stage-shell ${className || 'stage-iframe'}`}>
+        {shouldMount && (
+          <iframe
+            ref={iframeRef}
+            src={`${STUDIO_URL}/?embed=1`}
+            title={title}
+            loading={lazy ? 'lazy' : 'eager'}
+            className="stage-shell-frame"
+            allow="autoplay"
+            onLoad={() => {
+              setReady(true);
+              setTimeout(() => {
+                postToIframe('SET_PROJECT', latestPropsRef.current.project);
+                postToIframe('SET_VIEW_MODE', latestPropsRef.current.viewMode);
+              }, 80);
+              if (loadFallbackRef.current !== null) {
+                window.clearTimeout(loadFallbackRef.current);
+              }
+              loadFallbackRef.current = window.setTimeout(() => {
+                setStageLoaded(true);
+                loadFallbackRef.current = null;
+              }, 2200);
+            }}
+          />
+        )}
+        <div
+          className={`stage-loading-overlay ${stageLoaded ? 'is-ready' : ''}`}
+          aria-hidden={stageLoaded}
+        >
+          <span className="stage-loading-spinner" />
+          <span>Loading 3D Studio...</span>
+        </div>
+      </div>
     );
   }
 );

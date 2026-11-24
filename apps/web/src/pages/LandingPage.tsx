@@ -266,6 +266,7 @@ export function LandingPage() {
             <div className="stage-viewport showcase-viewport">
               <StudioStage
                 ref={stageRef}
+                lazy
                 project={stageProject}
                 viewMode={act === 'garden' ? 'garden_entrance' : act === 'seal' ? 'wax_envelope' : 'stage'}
                 onReady={() => setStageReady(true)}

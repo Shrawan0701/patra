@@ -16,10 +16,7 @@ import {
   PREMIUM_TEMPLATES,
   TemplatePreset,
   TemplateRegionId,
-  hasStudioUnlockAccess,
 } from '@patra/shared';
-import { PaywallModal } from '../../src/components/PaywallModal';
-import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { STUDIO_URL } from '../../src/lib/api';
 import { FONTS, SHADOWS, tapHaptic } from '../../src/theme';
@@ -40,7 +37,6 @@ const REGION_TABS: { id: 'all' | TemplateRegionId; label: string }[] = [
 export default function PremiumTemplatesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, refreshUser } = useAuth();
   const { colors } = useTheme();
   const webRef = useRef<{ injectJavaScript: (script: string) => void } | null>(null);
 
@@ -49,9 +45,6 @@ export default function PremiumTemplatesScreen() {
   const [viewMode, setViewMode] = useState<'stage' | 'wax_envelope'>('stage');
   const [ready, setReady] = useState(false);
   const [previewing, setPreviewing] = useState(false);
-  const [paywallOpen, setPaywallOpen] = useState(false);
-
-  const unlocked = hasStudioUnlockAccess(user);
 
   const visibleTemplates = useMemo(
     () => (region === 'all' ? PREMIUM_TEMPLATES : PREMIUM_TEMPLATES.filter((t) => t.region === region)),
@@ -80,18 +73,6 @@ export default function PremiumTemplatesScreen() {
           <Text style={[styles.headerTitle, { color: colors.ink }]}>Global Signature 3D</Text>
           <Text style={[styles.headerSub, { color: colors.muted }]}>30 Handcrafted Atelier Designs</Text>
         </View>
-        {!unlocked ? (
-          <TouchableOpacity
-            style={[styles.unlockCta, { backgroundColor: colors.vermilion }]}
-            onPress={() => {
-              tapHaptic();
-              setPaywallOpen(true);
-            }}
-          >
-            <Ionicons name="lock-open-outline" size={14} color="#fff" />
-            <Text style={styles.unlockCtaText}>Unlock</Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
 
       <View style={[styles.regionRow, { borderBottomColor: colors.border, backgroundColor: colors.paper }]}>
@@ -234,62 +215,21 @@ export default function PremiumTemplatesScreen() {
                   >
                     <Text style={[styles.cardBtnText, { color: colors.ink }]}>Preview 3D</Text>
                   </TouchableOpacity>
-                  {unlocked && (
-                    <TouchableOpacity
-                      style={[styles.cardBtn, { backgroundColor: colors.vermilion, borderColor: colors.vermilion }]}
-                      onPress={() => {
-                        tapHaptic();
-                        router.push(`/editor/tpl:${tpl.id}` as never);
-                      }}
-                    >
-                      <Text style={[styles.cardBtnText, { color: '#fff' }]}>Customize</Text>
-                    </TouchableOpacity>
-                  )}
+                  <TouchableOpacity
+                    style={[styles.cardBtn, { backgroundColor: colors.vermilion, borderColor: colors.vermilion }]}
+                    onPress={() => {
+                      tapHaptic();
+                      router.push(`/editor/tpl:${tpl.id}` as never);
+                    }}
+                  >
+                    <Text style={[styles.cardBtnText, { color: '#fff' }]}>Customize</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              {!unlocked && (
-                <View style={styles.blurLockOverlay}>
-                  <View style={styles.lockBadge}>
-                    <Ionicons name="lock-closed" size={20} color="#fff" />
-                  </View>
-                  <Text style={styles.lockTitle}>{tpl.name}</Text>
-                  <View style={styles.cardActions}>
-                    <TouchableOpacity
-                      style={[styles.lockBtn, { backgroundColor: 'rgba(255,255,255,0.92)' }]}
-                      onPress={() => {
-                        tapHaptic();
-                        setFeatured(tpl);
-                        setViewMode('stage');
-                      }}
-                    >
-                      <Text style={[styles.lockBtnText, { color: '#181512' }]}>Preview 3D</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.lockBtn, { backgroundColor: colors.vermilion }]}
-                      onPress={() => {
-                        tapHaptic();
-                        setPaywallOpen(true);
-                      }}
-                    >
-                      <Text style={[styles.lockBtnText, { color: '#fff' }]}>Unlock</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
             </View>
           );
         })}
       </ScrollView>
-
-      <PaywallModal
-        visible={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        onUnlocked={() => {
-          setPaywallOpen(false);
-          void refreshUser();
-        }}
-      />
     </View>
   );
 }
@@ -307,15 +247,6 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   headerTitle: { fontFamily: FONTS.bold, fontSize: 16 },
   headerSub: { fontFamily: FONTS.regular, fontSize: 11.5 },
-  unlockCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    height: 34,
-    borderRadius: 10,
-  },
-  unlockCtaText: { fontFamily: FONTS.bold, color: '#fff', fontSize: 12.5 },
   regionRow: { borderBottomWidth: 1 },
   regionScroll: { paddingHorizontal: 14, paddingVertical: 8, gap: 8 },
   regionPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1 },
@@ -362,27 +293,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardBtnText: { fontFamily: FONTS.semibold, fontSize: 12.5 },
-  blurLockOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(20, 17, 15, 0.78)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    gap: 10,
-  },
-  lockBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lockTitle: { fontFamily: FONTS.bold, fontSize: 16, color: '#fff' },
-  lockBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-  },
-  lockBtnText: { fontFamily: FONTS.semibold, fontSize: 12.5 },
 });

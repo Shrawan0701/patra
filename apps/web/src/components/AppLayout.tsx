@@ -12,7 +12,6 @@ import {
   MailOpen,
   Menu,
   Plus,
-  Sparkles,
   SunMoon,
   UserCircle,
   X,
@@ -20,7 +19,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -122,30 +121,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {user && (
-            <div
-              style={{
-                padding: '12px 14px',
-                borderRadius: 4,
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 12.5 }}>
-                <Sparkles size={13} color="var(--accent)" />
-                <span>{user.planTier === 'NONE' ? 'Pay-Per-Download' : user.planTier.replace(/_/g, ' ')}</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
-                {user.planExportsRemaining > 0
-                  ? `${user.planExportsRemaining} plan downloads left`
-                  : `${user.exportCredits} download credits`}
-              </div>
-            </div>
-          )}
-
           <button type="button" className="btn" onClick={handleLogout} style={{ width: '100%' }}>
             <LogOut size={15} /> Sign Out
           </button>
