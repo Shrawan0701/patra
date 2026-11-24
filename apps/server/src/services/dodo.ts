@@ -68,6 +68,7 @@ export async function createDodoCheckoutSession(params: {
         name: params.userName,
       },
       billing_currency: params.currency,
+      minimal_address: true,
       return_url: finalReturnUrl,
       metadata: {
         paymentId: params.paymentId,
