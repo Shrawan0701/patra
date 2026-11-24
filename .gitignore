@@ -1,0 +1,12 @@
+node_modules
+dist
+.expo
+.vercel
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.log
+*.db
+*.sqlite
+.DS_Store

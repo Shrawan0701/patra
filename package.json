@@ -1,0 +1,23 @@
+{
+  "name": "patra-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "apps/studio-3d",
+    "apps/server",
+    "apps/mobile",
+    "apps/web"
+  ],
+  "scripts": {
+    "build:shared": "npm --workspace=packages/shared run build",
+    "build:studio": "npm --workspace=apps/studio-3d run build",
+    "build:server": "npm --workspace=apps/server run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "dev:studio": "npm --workspace=apps/studio-3d run dev",
+    "dev:server": "npm --workspace=apps/server run dev",
+    "dev:mobile": "npm --workspace=apps/mobile run start",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "prisma:generate": "npm --workspace=apps/server run prisma:generate",
+    "prisma:push": "npm --workspace=apps/server run prisma:push"
+  }
+}

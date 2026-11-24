@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanTier {
+  NONE
+  MONTHLY_CREATOR
+  YEARLY_ALL_ACCESS
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+model User {
+  id                   String             @id @default(cuid())
+  name                 String
+  email                String             @unique
+  passwordHash         String
+  expoPushToken        String?
+  referralCode         String             @unique
+  referredById         String?
+  referredBy           User?              @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals            User[]             @relation("UserReferrals")
+  exportCredits        Int                @default(0)
+  planTier             PlanTier           @default(NONE)
+  planExportsRemaining Int                @default(0)
+  planRenewsAt         DateTime?
+  autoRenewCancelled   Boolean            @default(false)
+  dodoCustomerId       String?
+  dodoSubscriptionId   String?            @unique
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  projects             Project[]
+  payments             Payment[]
+  exports              ExportRecord[]
+  passwordResetOtps    PasswordResetOtp[]
+  notifications        InAppNotification[]
+}
+
+model InAppNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetOtp {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Project {
+  id                 String         @id @default(cuid())
+  userId             String
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title              String
+  category           String
+  aspectRatio        String         @default("9:16")
+  musicId            String         @default("shehnai_bliss")
+  roomsJson          Json
+  reexportGraceUntil DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  exports            ExportRecord[]
+  payments           Payment[]
+
+  @@index([userId])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId        String?
+  project          Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  dodoSessionId    String?       @unique
+  dodoPaymentId    String?       @unique
+  planId           String
+  amount           Float
+  currency         String
+  status           PaymentStatus @default(PENDING)
+  referralRewarded Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model ExportRecord {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId    String?
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectTitle String
+  aspectRatio  String
+  resolution   String   @default("1080p")
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}

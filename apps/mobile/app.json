@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Patra",
+    "slug": "patra-3d-invites",
+    "scheme": "patra",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/patra-logo.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F7F3EC",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.patra.studio"
+    },
+    "android": {
+      "package": "app.patra.studio",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/patra-logo.png",
+        "backgroundColor": "#F7F3EC"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Patra to save your 3D invitation videos to your photo gallery.",
+          "savePhotosPermission": "Allow Patra to save your 3D invitation videos to your photo gallery."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

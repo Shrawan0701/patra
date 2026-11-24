@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F6F5F1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0C10" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Patra" />
+    <script>
+      try {
+        var s = localStorage.getItem('color-scheme');
+        if (s === 'light' || s === 'dark') {
+          document.querySelector('meta[name="color-scheme"]').content = s;
+        }
+      } catch (e) {}
+    </script>
+
+    <title>Patra | 3D Folding Video Invitations & 1-Page Invitation Cards</title>
+    <meta
+      name="description"
+      content="Design unforgettable 3D folding wedding, birthday, and celebration video invitations guests walk through and open like living architecture, plus 24 printable & WhatsApp 1-page cards. Edit free, download in 4K."
+    />
+    <meta
+      name="keywords"
+      content="3D invitation video maker, 3D wedding invitation video, folding video invitations, digital wax seal invite, Indian wedding invitation video, birthday party 3D video invite, 1-page WhatsApp wedding card, printable wedding invitation card, 4K wedding e-invite, Patra Media"
+    />
+    <meta name="author" content="Patra" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://patra.media/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Patra" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://patra.media/" />
+    <meta
+      property="og:title"
+      content="Patra | Invitations Guests Walk Into, Unseal & Replay in 4K"
+    />
+    <meta
+      property="og:description"
+      content="Stop sending flat templates. Craft 3D estate garden walkthroughs, wax-seal envelope reveals, and 24 luxury 1-page cards for weddings, birthdays, and events. Preview live free."
+    />
+    <meta property="og:image" content="https://patra.media/patra-logo.png" />
+    <meta property="og:image:alt" content="Patra folding invitation brand mark" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Patra | 3D Folding Video Invitations & 1-Page Cards"
+    />
+    <meta
+      name="twitter:description"
+      content="Turn weddings, birthdays, and milestone events into unfolding 3D cinema and crisp 1-page cards. Customize free on desktop or mobile and download in 4K."
+    />
+    <meta name="twitter:image" content="https://patra.media/patra-logo.png" />
+
+    <!-- Icons & PWA Manifest -->
+    <link rel="icon" type="image/png" href="/patra-logo.png" />
+    <link rel="apple-touch-icon" href="/patra-logo.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured Data: Organization, Website & Software Application -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://patra.media/#organization",
+            "name": "Patra",
+            "url": "https://patra.media",
+            "logo": "https://patra.media/patra-logo.png",
+            "email": "support@patra.media"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://patra.media/#website",
+            "url": "https://patra.media/",
+            "name": "Patra | 3D Folding Video Invitations & 1-Page Cards",
+            "publisher": { "@id": "https://patra.media/#organization" },
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Patra 3D Invitation Studio",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "Web, iOS, Android",
+            "url": "https://patra.media/",
+            "image": "https://patra.media/patra-logo.png",
+            "description": "Design multi-room 3D folding invitation videos with estate gardens, floral wax seals, dual photo standees, and 24 single-page invitation cards.",
+            "featureList": [
+              "8 Folding 3D Architectural Invitation Structures",
+              "30 Global Heritage 3D Invitation Templates",
+              "Animated Floral Gatefold & Wax-Seal Envelope Reveals",
+              "3D Estate Gardens & Day-to-Twilight Atmosphere Controls",
+              "24 Printable & WhatsApp 1-Page Invitation Cards with Dual Photo Crop",
+              "4K MP4 Video & HD PNG/JPG Card Downloads"
+            ],
+            "offers": {
+              "@type": "Offer",
+              "price": "3.00",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://patra.media/pricing"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
