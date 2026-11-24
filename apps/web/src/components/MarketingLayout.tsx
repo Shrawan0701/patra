@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { HalftoneCanvas } from './HalftoneCanvas';
 
 export function MarketingLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { isDark, setPreference } = useTheme();
 
   return (
     <div>
@@ -14,7 +15,7 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
       <div className="floating-nav-wrap">
         <div style={{ width: '100%', maxWidth: 820, position: 'relative' }}>
           <header className="floating-nav">
-            <Link to="/" className="brand-mark" onClick={() => setMenuOpen(false)}>
+            <Link to="/" className="brand-mark">
               <img src="/patra-logo.png" alt="Patra Logo" />
               <span>Patra</span>
             </Link>
@@ -26,30 +27,21 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
               <NavLink to="/contact">Contact</NavLink>
             </nav>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
                 type="button"
-                className="nav-mobile-toggle"
-                aria-label="Toggle navigation menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((v) => !v)}
+                className="nav-theme-toggle"
+                onClick={() => setPreference(isDark ? 'light' : 'dark')}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={isDark ? 'Light mode' : 'Dark mode'}
               >
-                {menuOpen ? <X size={18} /> : <Menu size={18} />}
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <Link to={user ? '/app' : '/login'} className="nav-pill-cta" onClick={() => setMenuOpen(false)}>
+              <Link to={user ? '/app' : '/login'} className="nav-pill-cta">
                 {user ? 'Open Studio' : 'Login'}
               </Link>
             </div>
           </header>
-
-          {menuOpen && (
-            <nav className="floating-nav-drawer" aria-label="Mobile menu">
-              <NavLink to="/features" onClick={() => setMenuOpen(false)}>Features</NavLink>
-              <NavLink to="/templates" onClick={() => setMenuOpen(false)}>Templates</NavLink>
-              <NavLink to="/about" onClick={() => setMenuOpen(false)}>About</NavLink>
-              <NavLink to="/contact" onClick={() => setMenuOpen(false)}>Contact</NavLink>
-            </nav>
-          )}
         </div>
       </div>
 

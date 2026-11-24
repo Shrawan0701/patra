@@ -96,6 +96,32 @@ export function LandingCardsShowcase({ isAuthenticated }: LandingCardsShowcasePr
               )}
             </div>
 
+            <div className="landing-cards-mobile-rail" role="group" aria-label="Select card edition">
+              {cards.map((card, idx) => {
+                const isActive = idx === activeIdx;
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    className={`landing-cards-mobile-pill ${isActive ? 'active' : ''}`}
+                    onClick={() => setActiveIdx(idx)}
+                  >
+                    <span
+                      className="landing-card-swatch-dot"
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 4,
+                        background: card.config.paperColor,
+                        borderColor: card.config.accentColor,
+                      }}
+                    />
+                    <span>{card.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="landing-cards-stage-caption">
               <span>{activeCard.name}</span>
               <span>Click side cards to bring forward</span>
@@ -114,7 +140,7 @@ export function LandingCardsShowcase({ isAuthenticated }: LandingCardsShowcasePr
               </p>
             </div>
 
-            <div>
+            <div className="landing-cards-desktop-picker">
               <div className="landing-cards-picker-label">SIGNATURE CARD EDITIONS</div>
               <div className="landing-cards-picker">
                 {cards.map((card, idx) => {
