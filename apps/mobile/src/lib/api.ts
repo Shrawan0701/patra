@@ -1,8 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CurrencyCode, ExportRecord, PlanId, ProjectConfig, UserProfile } from '@patra/shared';
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
-export const STUDIO_URL = process.env.EXPO_PUBLIC_STUDIO_URL || 'http://localhost:5173';
+const DEFAULT_API_URL = __DEV__ ? 'http://localhost:4000' : 'https://patra-orfr.onrender.com';
+const DEFAULT_STUDIO_URL = __DEV__ ? 'http://localhost:5173' : 'https://studio.patra.media';
+
+export const API_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL)
+  .trim()
+  .replace(/\/+$/, '');
+export const STUDIO_URL = (process.env.EXPO_PUBLIC_STUDIO_URL || DEFAULT_STUDIO_URL)
+  .trim()
+  .replace(/\/+$/, '');
 
 const TOKEN_KEY = 'patra_auth_token';
 
