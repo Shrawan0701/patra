@@ -146,7 +146,12 @@ export const api = {
   deleteExport: (id: string) =>
     request<{ ok: boolean }>(`/api/exports/${id}`, { method: 'DELETE' }),
 
-  createCheckout: (payload: { planId: PlanId; currency: CurrencyCode; projectId?: string }) =>
+  createCheckout: (payload: {
+    planId: PlanId;
+    currency: CurrencyCode;
+    projectId?: string;
+    returnUrl?: string;
+  }) =>
     request<{
       paymentId: string;
       mode: 'dodo' | 'dev_sandbox';
@@ -157,6 +162,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+
+  getPaymentStatus: (paymentId: string) =>
+    request<{
+      status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+      planId: string;
+      planName: string;
+      amount: number;
+      currency: CurrencyCode;
+      user: UserProfile | null;
+    }>(`/api/payments/status/${encodeURIComponent(paymentId)}`),
 
   devConfirmPayment: (paymentId: string) =>
     request<{ ok: boolean; user: UserProfile }>('/api/payments/dev-confirm', {

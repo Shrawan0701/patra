@@ -31,6 +31,40 @@ paymentsRouter.get('/plans', (req, res) => {
   res.json({ plans: PRICING_PLANS, detectedCurrency });
 });
 
+paymentsRouter.get('/mobile-return', (req, res) => {
+  const paymentId = String(req.query.paymentId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  const status = String(req.query.status || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  const deepLink = `patra://payment-return?paymentId=${encodeURIComponent(paymentId)}&status=${encodeURIComponent(status)}`;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  return res.send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="0;url=${deepLink}" />
+    <title>Returning to Patra...</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F7F3EC; color: #1A1614; display: flex; min-height: 100vh; margin: 0; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+      .card { background: #fff; border: 1px solid #E5DFD5; border-radius: 16px; padding: 28px 22px; max-width: 360px; width: 100%; }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      p { font-size: 14px; color: #6B635B; margin: 0 0 18px; line-height: 1.5; }
+      a { display: inline-block; background: #2E5A44; color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 12px 20px; border-radius: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Returning to Patra...</h1>
+      <p>Your checkout session finished. Return to the Patra app to verify your payment.</p>
+      <a href="${deepLink}">Return to Patra App</a>
+    </div>
+    <script>
+      try { window.location.replace(${JSON.stringify(deepLink)}); } catch (e) {}
+    </script>
+  </body>
+</html>`);
+});
+
 async function createInAppNotification(
   userId: string,
   type: string,
@@ -398,9 +432,9 @@ paymentsRouter.get('/status/:paymentId', requireAuth, async (req: AuthedRequest,
           name: user.name,
           email: user.email,
           referralCode: user.referralCode,
-          exportCredits: user.exportCredits,
+          exportCredits: Math.max(0, user.exportCredits),
           planTier: user.planTier,
-          planExportsRemaining: user.planExportsRemaining,
+          planExportsRemaining: Math.max(0, user.planExportsRemaining),
           planRenewsAt: user.planRenewsAt?.toISOString() ?? null,
           autoRenewCancelled: user.autoRenewCancelled,
           createdAt: user.createdAt.toISOString(),
