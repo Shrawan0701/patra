@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.gitignore
+**/.env
+**/.env.*
+!apps/server/.env.example
+store-assets
+*.sql
+apps/web/src
+apps/web/public
+apps/studio-3d/src
+apps/mobile/app
+apps/mobile/src
+apps/mobile/assets
