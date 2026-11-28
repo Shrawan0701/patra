@@ -11,14 +11,14 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://patra-orfr.onrender.com",
+        "EXPO_PUBLIC_API_URL": "https://api.patra.media",
         "EXPO_PUBLIC_STUDIO_URL": "https://studio.patra.media"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://patra-orfr.onrender.com",
+        "EXPO_PUBLIC_API_URL": "https://api.patra.media",
         "EXPO_PUBLIC_STUDIO_URL": "https://studio.patra.media"
       }
     }
